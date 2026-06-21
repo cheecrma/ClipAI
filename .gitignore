@@ -1,0 +1,31 @@
+# --- 대용량 모델 (git 제외, 100MB 초과) ---
+# 회사 PC에선 models/ 에 .gguf 를 직접 배치 (get-model.ps1 또는 USB, models/MODEL_GUIDE.md 참고)
+models/*.gguf
+dist/ClipAI/models/*.gguf
+
+# --- 배포 zip (1.6GB) 제외 ---
+dist/*.zip
+
+# --- 빌드 중간물 ---
+build/_work/
+
+# --- 파이썬 캐시 ---
+__pycache__/
+*.pyc
+*.pyo
+
+# --- 런타임 로그 ---
+clipai_error.log
+*.log
+
+# --- OS/에디터 ---
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# --- Claude Code 로컬 설정 (개인) ---
+.claude/
+
+# 참고: dist/ClipAI/ (빌드된 exe + _internal) 는 의도적으로 git에 포함한다.
+#       회사 PC에서 pull 후 모델만 넣고 ClipAI.exe 더블클릭 → Python 불필요.

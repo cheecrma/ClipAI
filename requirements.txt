@@ -1,0 +1,16 @@
+# ClipAI dependencies (prototype: Ollama backend)
+requests>=2.31
+keyboard>=0.13.5
+pyperclip>=1.8.2
+customtkinter>=5.2.0
+pystray>=0.19.5
+Pillow>=10.0.0
+pywin32>=306
+tomli>=2.0.1; python_version < "3.11"
+
+# 독립 실행(llamacpp) 백엔드 — CPU(AVX2) 휠. 아래 명령으로 설치:
+#   pip install "llama-cpp-python==0.3.2" --only-binary=:all: \
+#       --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+# (0.3.2 는 AVX2 휠이라 AVX512 없는 CPU=12세대 인텔/LG그램에서도 동작.
+#  최신 0.3.30 은 AVX512 요구로 일부 CPU에서 크래시하므로 0.3.2 고정.)
+llama-cpp-python==0.3.2
