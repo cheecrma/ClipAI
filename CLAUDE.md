@@ -270,7 +270,6 @@ restore_clipboard = true
 - 모드 추가(말투 교정, 코드 설명, 표 추출 등) — 단축키 매핑만 확장.
 - `backend="remote"`로 집 DGX Spark의 OpenAI 호환 서버 연동(닿는 환경에서).
 - 설정 GUI, 결과 히스토리, 다중 모델 핫스왑.
-- 사내 LS GPT/Dify 엔드포인트 연동 옵션(승인 시).
 
 ---
 
