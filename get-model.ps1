@@ -4,9 +4,11 @@
 #         PowerShell 에서:  powershell -ExecutionPolicy Bypass -File get-model.ps1
 $ErrorActionPreference = "Stop"
 
-$url  = "https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct-GGUF/resolve/main/EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf"
+# 기본 모델: Gemma 2 2B (상업 사용 가능, Gemma 약관). 회사 업무용 OK.
+# (한국어 품질을 최우선하는 개인/연구용은 MODEL_GUIDE.md 의 EXAONE 참고)
+$url  = "https://huggingface.co/lmstudio-community/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$dest = Join-Path $root "dist\ClipAI\models\EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf"
+$dest = Join-Path $root "dist\ClipAI\models\gemma-2-2b-it-Q4_K_M.gguf"
 
 New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
 

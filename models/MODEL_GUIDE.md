@@ -23,11 +23,10 @@ ClipAI 는 이 `models` 폴더 안의 **GGUF** 모델 파일로 동작합니다.
 
 ### 추천 모델
 
-- **기본 (한·영 우수)**: `LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct-GGUF`
-- **더 가볍고 빠르게 (저사양/노트북)**:
-  - 위 모델의 `Q3_K_M`, 또는 **EXAONE 4.0 1.2B** (추론 모드 OFF 필수)
-  - `Qwen/Qwen2.5-3B-Instruct-GGUF` (리스트 정리에 강함)
-- **더 똑똑하게 (사양 여유)**: `Qwen2.5-7B-Instruct-GGUF` (Q4_K_M, 속도는 느려짐)
+- **기본/회사용 (상업 OK)**: **Gemma 2 2B** — `lmstudio-community/gemma-2-2b-it-GGUF` (`Q4_K_M`)
+- **개인/한국어 최상 (비상업 NC)**: `LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct-GGUF`
+- **상업 + 더 똑똑 (사양 여유)**: `Qwen2.5-7B-Instruct-GGUF` (Apache-2.0, 속도는 느려짐)
+- **상업 + 더 가볍게**: `Qwen/Qwen2.5-1.5B-Instruct-GGUF` (Apache-2.0)
 
 ## 바꾸는 방법
 
@@ -41,12 +40,10 @@ ClipAI 는 이 `models` 폴더 안의 **GGUF** 모델 파일로 동작합니다.
 
 ## ⚠️ 라이선스 (중요)
 
-- 기본 모델 **EXAONE 3.5 는 비상업용(NC)** 입니다 — 연구·교육·개인·내부용만 허용,
-  **상업/회사 업무용 금지**.
-- **상업적으로 쓰려면** 아래 상업 가능 모델로 교체하세요 (각 라이선스 직접 확인):
-  - **Qwen2.5** (Apache-2.0 변형): `Qwen/Qwen2.5-3B-Instruct-GGUF` 등
-  - **Google Gemma** (Gemma 약관): `google/gemma-2-2b-it` GGUF 등
-  - **Meta Llama 3.x** (Llama 약관)
+- **기본 Gemma 2 2B 는 Gemma 약관상 상업 사용 허용** → 회사 업무용 OK (금지 사용 정책 준수).
+- **EXAONE 3.5 는 비상업용(NC)** — 연구·교육·개인용만, **상업/회사 업무용 금지**.
+- 그 외 상업 가능: **Qwen2.5 (Apache-2.0: 1.5B/7B 등)**, **Meta Llama 3.x**(Llama 약관).
+- 각 모델 약관은 쓰기 전 직접 확인하세요 (특히 Gemma/Llama 는 약관 동의 필요).
 
 ## 주의
 

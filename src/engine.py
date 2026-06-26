@@ -137,10 +137,11 @@ class LlamaCppEngine:
             print(f"[engine] warmup failed: {e}")
 
     def stream(self, system: str, user: str, options: dict):
-        messages = [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ]
+        # system 프롬프트를 user 메시지에 합쳐 단일 user 턴으로 보낸다.
+        # 이유: Gemma 등 일부 모델의 채팅 템플릿은 'system' 역할을 거부한다.
+        #       합쳐 보내면 EXAONE/Qwen/Gemma 등 어떤 GGUF 든 호환된다.
+        content = f"{system}\n\n{user}" if system else user
+        messages = [{"role": "user", "content": content}]
         for chunk in self.llm.create_chat_completion(
             messages=messages,
             temperature=options.get("temperature", 0.2),

@@ -3,8 +3,8 @@
 별도 설치(Ollama 등) 필요 없는 **독립 실행판**.
 텍스트는 외부로 나가지 않고 전부 이 PC 안에서(로컬) 처리됩니다.
 
-> ⚠️ 기본 모델 **EXAONE 3.5 는 비상업용(NC)** 입니다. 회사 업무/상업용은
-> `models\MODEL_GUIDE.md` 의 상업 가능 모델로 교체하세요.
+> 기본 모델 **Gemma 2 2B** 는 상업 사용이 허용되어(Gemma 약관) **회사 업무용으로 사용 가능**합니다.
+> 한국어 품질을 더 원하면(개인/비상업) EXAONE 으로 교체 가능 — `models\MODEL_GUIDE.md` 참고.
 
 ## 사용법
 
@@ -57,7 +57,7 @@ max_tokens  = 400
 ```
 ClipAI.exe          실행 파일
 config.toml         설정 (모델 / 성능 / 모드·단축키·프롬프트)
-models\             AI 모델(.gguf) — 기본 EXAONE 3.5 2.4B
+models\             AI 모델(.gguf) — 기본 Gemma 2 2B
 models\MODEL_GUIDE.md   다른 모델로 바꾸는 방법 + 라이선스
 _internal\          프로그램 부속 파일 (수정/삭제 금지)
 ```
