@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import queue
+import threading
 import time
 import tkinter as tk
 
@@ -72,6 +73,9 @@ class Popup:
         self._result_text = ""
         self._shown_at = 0.0  # 마지막으로 팝업을 띄운 시각(포커스아웃 유예용)
         self._sized = False   # 최초 표시 때 기본(카톡) 크기 강제, 이후엔 사용자 크기 유지
+        # 동시 추론 방지: 한 번에 하나만, 새 요청은 진행 중 추론을 중단시킴
+        self._infer_lock = threading.Lock()
+        self._cancel = threading.Event()
 
         # 바인딩
         self.root.bind("<Escape>", lambda e: self.hide())
@@ -273,7 +277,8 @@ class Popup:
         self.running = True
         self.start_ts = time.time()
 
-        run_stream(engine, system, user, options, self.queue, gen)
+        run_stream(engine, system, user, options, self.queue, gen,
+                   self._infer_lock, self._cancel)
         self._tick_timer(gen)
         self._poll_queue(gen)
 
@@ -326,6 +331,7 @@ class Popup:
     # ---- 토스트 (선택 텍스트 없음 등) ------------------------------------
     def toast(self, message: str):
         self.gen += 1  # 진행 중 스트림 무효화
+        self._cancel.set()  # 진행 중 추론도 중단 (팝업을 토스트로 대체)
         self.running = False
         self.mode_lbl.configure(text="ClipAI")
         self.timer_lbl.configure(text="")
