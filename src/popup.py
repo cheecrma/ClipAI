@@ -237,9 +237,9 @@ class Popup:
         self.body.configure(state="disabled")
 
     # ---- 동작: 스트리밍 시작 ---------------------------------------------
-    def begin(self, engine, mode: str, text: str):
-        """단축키 트리거 시 호출 (메인 스레드)."""
-        meta = prompts.MODES.get(mode, {"icon": "✨", "title": mode})
+    def begin(self, engine, mode: dict, text: str):
+        """단축키 트리거 시 호출 (메인 스레드). mode 는 config 의 모드 dict."""
+        meta = {"icon": mode.get("icon", "✨"), "title": mode.get("title", mode.get("key", ""))}
         system, user, options, banner = prompts.build(mode, text)
 
         # 긴 입력은 컨텍스트에 맞게 안전하게 자른다

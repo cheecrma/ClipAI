@@ -1,11 +1,15 @@
 # ClipAI — 클립보드 단축키 AI 어시스턴트
 
 > Windows 상주형 트레이 앱. 드래그로 선택한 텍스트를 단축키 한 번으로
-> **요약 / 번역 / 리스트 정리** 하고, 다크 팝업에 결과를 **스트리밍**으로 띄운다.
+> **요약 / 번역 / 리스트 정리 / 반박 / 보고서 정리** 하고, 다크 팝업에 결과를 **스트리밍**으로 띄운다.
 > **완전 독립 실행** — Ollama·인터넷 불필요, 텍스트는 외부로 나가지 않고 전부 로컬(온디바이스) 처리.
+> **단축키·프롬프트는 config.toml 에서 자유롭게 커스터마이즈** (코드 수정·재빌드 불필요).
 
 이 문서는 "**무엇을 어떻게 만들었는가**"를 정리한 개발/배포 문서입니다.
 (원본 설계 명세는 [CLAUDE.md](CLAUDE.md), 최종 사용자용 안내는 [dist/ClipAI/README.md](dist/ClipAI/README.md))
+
+> ⚠️ **라이선스 주의**: 기본 모델 EXAONE 3.5 는 **비상업용(NC)** 입니다.
+> 상업/회사 업무용은 [§11 라이선스](#11-라이선스--사용-제한) 를 반드시 확인하세요.
 
 ---
 
@@ -16,6 +20,10 @@
 | `Ctrl + Alt + A` | summarize | 선택 텍스트 요약 (원문 언어로) |
 | `Ctrl + Alt + S` | listify | 핵심을 불릿 리스트로 정리 |
 | `Ctrl + Alt + D` | translate | 한↔영 자동 감지 번역 |
+| `Ctrl + Alt + F` | rebut | 선택 주장에 대한 논리적 반박 |
+| `Ctrl + Alt + X` | report | 업무 보고서 형식으로 재구성 |
+
+> 위 모드·단축키·프롬프트는 모두 `config.toml` 에서 추가·수정·삭제할 수 있습니다 → [§6.7 커스터마이즈](#67-커스터마이즈-모드단축키프롬프트-config-기반).
 
 - 다크 테마, **카톡처럼 좁고 긴** 미니 팝업이 마우스 커서 근처에 출현.
 - 결과를 **토큰 스트리밍**으로 실시간 표시 (첫 글자까지 ~1.5초).
@@ -159,9 +167,28 @@ DanChucKic/
 ### 6.6 패키징 (PyInstaller onedir)
 - **onedir** 채택(onefile은 매 실행 임시 추출로 상주앱에 불리).
 - 모델 GGUF는 exe에 안 넣고 **`models/` 외부 배치** → 교체 가능 + exe 경량.
-- **공유 파이썬 환경에 깔린 무거운 패키지(torch+CUDA ~2GB, OpenCV 등)가 transitively 끌려와**
-  빌드가 4GB+로 부풀던 문제 → spec `excludes` 로 제외 → `_internal` **4,223MB → 133MB**.
+- **공유 파이썬 환경에 깔린 무거운 패키지(torch+CUDA ~2GB, OpenCV, django 등)가 transitively 끌려와**
+  빌드가 4GB+로 부풀던 문제 → spec `excludes` + `llama_cpp` 서버 미수집 → `_internal` **4,223MB → 76MB**.
 - `llama_cpp` 의 `llama.dll`/`ggml*.dll` 은 `collect_dynamic_libs` 로 번들.
+
+### 6.7 커스터마이즈 (모드/단축키/프롬프트, config 기반)
+- 모드는 **하드코딩이 아니라 `config.toml` 의 `[[modes]]`** 에서 읽는다 (`prompts.py` 가 로더).
+- 포크/사용자가 **코드 수정·재빌드 없이** 단축키·프롬프트를 바꾸거나 새 모드를 추가할 수 있다.
+  ```toml
+  [[modes]]
+  key         = "rebut"          # 고유 식별자
+  hotkey      = "ctrl+alt+f"     # 전역 단축키
+  icon        = "🗣"
+  title       = "반박"
+  type        = "simple"         # "simple" | "translate"(한↔영 자동)
+  system      = "너는 비판적 토론 도우미다. ... 반박을 3가지 제시하라."
+  temperature = 0.4
+  max_tokens  = 400
+  ```
+- `type="translate"` 는 `system_ko2en` / `system_en2ko` 두 프롬프트 + 한글 비율 자동 감지.
+- **배포 exe 사용자도** `dist/ClipAI/config.toml` 을 메모장으로 고치고 재시작만 하면 적용
+  (config 는 exe 옆 외부 파일이라 재빌드 불필요).
+- 잘못된 모드(필수 필드 누락·중복 hotkey)는 자동으로 건너뛰고 로그 출력.
 
 ---
 
@@ -176,18 +203,20 @@ n_gpu_layers = 0         # CPU 빌드는 0
 n_threads = 0            # 0=자동(전체 코어)
 n_batch   = 1024         # 입력 ingest 배치(기본 512). ↑면 긴글 읽기 빠름
 
-[hotkeys]
-summarize = "ctrl+alt+a"
-listify   = "ctrl+alt+s"
-translate = "ctrl+alt+d"
-
 [ui]
 width  = 340             # 카톡형 좁은 폭
 height = 580             # 긴 세로
-restore_clipboard = true
-capture_timeout_ms = 350
+restore_clipboard  = true
+capture_timeout_ms = 500 # 선택 캡처 대기 상한. 캡처가 가끔 빈값이면 ↑
 hide_on_focus_loss = false
+
+# 모드 = 단축키별 동작 (추가/수정 자유). §6.7 참고.
+[[modes]]
+key = "summarize"; hotkey = "ctrl+alt+a"; icon = "📝"; title = "요약"
+type = "simple";   system = "..."; temperature = 0.2; max_tokens = 256
+# ... (translate / listify / rebut / report 등)
 ```
+> 위 `[[modes]]` 는 가독성을 위해 한 줄로 줄였습니다. 실제 파일은 필드별 줄바꿈입니다.
 
 ---
 
@@ -235,7 +264,7 @@ pyinstaller build/clipai.spec --noconfirm --clean --distpath dist --workpath bui
 | 모델 로드 | ~0.5초 (mmap) |
 | 첫 토큰 | ~1.5초 |
 | 요약 완료 | ~3.5초 |
-| 빌드 용량 | exe 폴더 ~133MB + 모델 1.6GB, zip ~1.6GB |
+| 빌드 용량 | exe 폴더 ~76MB + 모델 1.6GB, zip ~1.6GB |
 
 목표였던 "10초 이내"를 GPU 없이도 충족.
 
@@ -245,4 +274,29 @@ pyinstaller build/clipai.spec --noconfirm --clean --distpath dist --workpath bui
 
 - **데스크톱 전용 CUDA 빌드**(RTX 2060 등 NVIDIA) → 더 빠른 추론 (NVIDIA 전용 별도 빌드).
 - **인텔 내장GPU(Vulkan/SYCL) 빌드** → 소스 컴파일 필요, 이득 제한적.
-- 모드 추가(말투 교정/코드 설명 등), 결과 히스토리, 설정 GUI, 원격(`backend="remote"`) 엔드포인트.
+- 결과 히스토리, 설정 GUI, 원격(`backend="remote"`) 엔드포인트.
+
+---
+
+## 11. 라이선스 / 사용 제한
+
+ClipAI 는 **코드**와 **모델**의 라이선스가 분리됩니다. 특히 모델에 주의하세요.
+
+### 모델 (가장 중요)
+- 기본 모델 **EXAONE 3.5** 의 라이선스는 **"EXAONE AI Model License Agreement 1.1 - NC"** 로,
+  **비상업(Non-Commercial)** 입니다. 연구·교육·개인·내부 검토 목적만 허용되며 **상업적 사용은 금지**됩니다.
+- ⚠️ **회사 업무/상업 제품에 쓰려면** EXAONE 대신 **상업 사용이 허용된 모델**로 교체하세요.
+  `models/` 에 `.gguf` 만 바꿔 넣으면 됩니다 ([models/MODEL_GUIDE.md](models/MODEL_GUIDE.md)).
+  - 상업 가능 예: **Qwen2.5 (Apache-2.0 변형)**, **Google Gemma**(Gemma 약관), **Meta Llama 3.x**(Llama 약관) 등 — 각 모델의 라이선스를 직접 확인하세요.
+- 이 저장소에는 **모델 가중치를 포함하지 않으며**, `get-model.ps1` 이 **LG 공식 HuggingFace** 에서 내려받습니다(원본 배포처 준수).
+
+### 코드 (ClipAI 자체)
+- `src/` 의 ClipAI 코드는 자유롭게 수정/포크해도 됩니다. (원하는 OSS 라이선스를 `LICENSE` 파일로 추가하세요. 예: MIT)
+- 단, 위 **모델 라이선스는 별도**이며 코드 라이선스가 모델 제약을 무효화하지 않습니다.
+
+### 사용 라이브러리 (참고)
+- `llama-cpp-python`/llama.cpp(MIT), `customtkinter`(MIT/CC), `pystray`(LGPL/GPL 듀얼),
+  `Pillow`(HPND), `keyboard`(MIT), `pyperclip`(BSD), `pywin32`(PSF), `requests`(Apache-2.0).
+  재배포 시 각 라이선스 고지를 따르세요.
+
+> 요약: **개인/연구용은 그대로**, **상업/회사용이면 모델을 상업 가능 모델로 교체**.

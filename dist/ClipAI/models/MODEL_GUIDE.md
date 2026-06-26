@@ -39,6 +39,15 @@ ClipAI 는 이 `models` 폴더 안의 **GGUF** 모델 파일로 동작합니다.
    또는 `path` 를 비워두면 가장 큰 `.gguf` 가 자동 선택됩니다.
 3. ClipAI 재시작 (트레이 종료 후 `ClipAI.exe` 실행).
 
+## ⚠️ 라이선스 (중요)
+
+- 기본 모델 **EXAONE 3.5 는 비상업용(NC)** 입니다 — 연구·교육·개인·내부용만 허용,
+  **상업/회사 업무용 금지**.
+- **상업적으로 쓰려면** 아래 상업 가능 모델로 교체하세요 (각 라이선스 직접 확인):
+  - **Qwen2.5** (Apache-2.0 변형): `Qwen/Qwen2.5-3B-Instruct-GGUF` 등
+  - **Google Gemma** (Gemma 약관): `google/gemma-2-2b-it` GGUF 등
+  - **Meta Llama 3.x** (Llama 약관)
+
 ## 주의
 
 - 이 빌드는 **CPU(AVX2)** 용입니다. 아주 오래된 CPU가 아니면 동작합니다.

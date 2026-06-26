@@ -15,16 +15,79 @@ n_batch      = 1024         # 입력 ingest 배치 크기(기본 512). 클수록
 ollama_model = "exaone3.5:2.4b"
 ollama_host  = "http://localhost:11434"
 
-[hotkeys]
-# Ctrl+Alt(=AltGr) 영역은 워드/메모장/브라우저 어디서도 안 겹친다.
-summarize = "ctrl+alt+a"   # 요약
-listify   = "ctrl+alt+s"   # 리스트 정리
-translate = "ctrl+alt+d"   # 번역
-
 [ui]
-theme             = "dark"
-width             = 340          # 카톡 느낌: 좁은 폭
-height            = 580          # 긴 세로
-restore_clipboard = true
-capture_timeout_ms = 350
-hide_on_focus_loss = false       # 팝업 밖 클릭 시 자동 닫힘 (꺼짐. Esc/닫기로만)
+theme              = "dark"
+width              = 340          # 카톡 느낌: 좁은 폭
+height             = 580          # 긴 세로
+restore_clipboard  = true
+capture_timeout_ms = 500          # 선택 텍스트 캡처 대기 상한(ms). 캡처가 가끔 빈값이면 ↑
+hide_on_focus_loss = false        # 팝업 밖 클릭 시 자동 닫힘 (꺼짐. Esc/닫기로만)
+
+# ─────────────────────────────────────────────────────────────────────────
+#  모드 (단축키별 동작)  ★ 여기만 고치면 자유롭게 커스텀 가능 (코드/재빌드 불필요)
+#  config.toml 저장 후 ClipAI 재시작하면 적용됨.
+#
+#  필드:
+#    key         내부 식별자 (고유, 영문)
+#    hotkey      전역 단축키 (예 "ctrl+alt+a"). Ctrl+Alt 조합이 충돌 적어 권장
+#    icon, title 팝업 헤더 표시
+#    type        "simple"(기본) | "translate"(한↔영 자동 감지)
+#    system      시스템 프롬프트 (type=simple)
+#    system_ko2en / system_en2ko   (type=translate 전용)
+#    temperature 0~1, 낮을수록 일관적
+#    max_tokens  최대 출력 길이
+#
+#  새 모드 추가 예: 아래 [[modes]] 블록을 복사해 key/hotkey/system 만 바꾸면 끝.
+# ─────────────────────────────────────────────────────────────────────────
+
+[[modes]]
+key         = "summarize"
+hotkey      = "ctrl+alt+a"
+icon        = "📝"
+title       = "요약"
+type        = "simple"
+system      = "너는 한국어 요약 도우미다. 입력 텍스트의 핵심만 3~5문장으로, 군더더기·인사말·머리말 없이 요약하라. '요약:' 같은 접두어를 붙이지 마라. 원문이 영어면 영어로, 한국어면 한국어로 답하라."
+temperature = 0.2
+max_tokens  = 256
+
+[[modes]]
+key         = "listify"
+hotkey      = "ctrl+alt+s"
+icon        = "•"
+title       = "리스트 정리"
+type        = "simple"
+system      = "입력 내용을 핵심 항목 불릿 리스트로 정리하라. 각 항목은 한 줄, 중복 제거, 논리적 순서. 마크다운 '- ' 형식만 사용하라. 머리말·맺음말·설명 없이 리스트만 출력하라."
+temperature = 0.2
+max_tokens  = 320
+
+[[modes]]
+key          = "translate"
+hotkey       = "ctrl+alt+d"
+icon         = "🌐"
+title        = "번역"
+type         = "translate"
+system_ko2en = "Translate the following Korean text into natural, fluent English. Output only the translation. Do not add explanations, notes, or labels."
+system_en2ko = "다음 영어 텍스트를 자연스러운 한국어로 번역하라. 번역문만 출력하고 설명·주석·머리말은 절대 붙이지 마라."
+temperature  = 0.3
+max_tokens   = 768
+
+# ── 커스텀 모드 예시 (그대로 써도 되고, 필요 없으면 지워도 됨) ──
+[[modes]]
+key         = "rebut"
+hotkey      = "ctrl+alt+f"
+icon        = "🗣"
+title       = "반박"
+type        = "simple"
+system      = "너는 비판적 토론 도우미다. 입력된 주장에 대해 논리적인 반박을 3가지 제시하라. 각 반박은 근거와 함께 한두 문장으로 간결하게, 마크다운 불릿('- ')으로. 머리말 없이 반박만."
+temperature = 0.4
+max_tokens  = 400
+
+[[modes]]
+key         = "report"
+hotkey      = "ctrl+alt+x"
+icon        = "📑"
+title       = "보고서 정리"
+type        = "simple"
+system      = "입력 내용을 업무 보고서 형식으로 재구성하라. 구성: **[개요]** 한 문단, **[주요 내용]** 불릿 목록, **[결론/다음 단계]** 불릿 목록. 군더더기 없이 간결하게 마크다운으로 출력하라."
+temperature = 0.3
+max_tokens  = 500
