@@ -13,6 +13,26 @@
 
 ---
 
+## 🚀 빠른 시작 (Windows)
+
+Python 설치 불필요 — 빌드된 exe가 저장소에 포함되어 있습니다.
+
+```powershell
+git clone https://github.com/cheecrma/ClipAI.git
+cd ClipAI
+# 모델(.gguf) 받기 — 둘 중 하나
+powershell -ExecutionPolicy Bypass -File get-model.ps1   # HuggingFace 자동 다운로드(~1.6GB)
+#   또는 회사망이 막히면 .gguf 를 USB로 dist\ClipAI\models\ 에 복사
+dist\ClipAI\ClipAI.exe                                    # 더블클릭 실행 → 트레이 상주
+```
+
+그다음 아무 앱에서 텍스트 드래그 → `Ctrl+Alt+A`(요약)/`S`(리스트)/`D`(번역)/`F`(반박)/`X`(보고서).
+
+**프롬프트·단축키 바꾸기**: `dist\ClipAI\config.toml` 의 `[[modes]]` 를 메모장으로 고치고 재시작.
+코드 수정·재빌드 불필요. → [§6.7 커스터마이즈](#67-커스터마이즈-모드단축키프롬프트-config-기반)
+
+---
+
 ## 1. 주요 기능
 
 | 단축키 | 모드 | 동작 |
