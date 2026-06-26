@@ -1,85 +1,14 @@
-"""LLM 추론 엔진.
-
-백엔드 추상화:
-  - OllamaEngine  : 프로토타입/현재. HTTP 스트리밍, keep_alive=-1 로 모델 상주.
-  - LlamaCppEngine: 배포 빌드. 인프로세스, 지연 임포트(미설치 환경 대비).
+"""LLM 추론 엔진 (llama-cpp-python 인프로세스, 독립 실행).
 
 공통 인터페이스:
   engine.stream(system, user, options) -> generator[str]   # 토큰 조각 yield
   engine.warmup()                                           # 모델 메모리 적재
+  engine.fit_input(system, user, num_predict)              # 컨텍스트 초과 시 안전 절단
   engine.name -> str                                        # UI 표시용
+
+(개발 초기엔 Ollama HTTP 백엔드도 있었으나, 독립 실행으로 확정한 뒤 제거함.)
 """
 from __future__ import annotations
-
-import json
-import requests
-
-
-class OllamaEngine:
-    def __init__(self, cfg: dict):
-        self.model = cfg.get("ollama_model", "exaone3.5:2.4b")
-        self.host = cfg.get("ollama_host", "http://localhost:11434").rstrip("/")
-        self.n_ctx = cfg.get("n_ctx", 4096)
-        self.name = f"Ollama · {self.model}"
-
-    def fit_input(self, system: str, user: str, num_predict: int):
-        """입력이 컨텍스트를 넘으면 앞부분만 남겨 안전하게 자른다.
-        (Ollama 토크나이저 직접 접근이 어려워 문자 휴리스틱 사용)
-        반환: (잘린_user, 잘렸는지_bool)"""
-        budget = self.n_ctx - num_predict - 80
-        # 한국어 보수적으로 1토큰 ≈ 1.5자 가정
-        max_chars = max(400, int((budget - len(system) / 1.5) * 1.5))
-        if len(user) <= max_chars:
-            return user, False
-        return user[:max_chars], True
-
-    def warmup(self):
-        """모델을 메모리에 상주시킨다 (콜드 스타트 제거)."""
-        try:
-            requests.post(
-                f"{self.host}/api/chat",
-                json={
-                    "model": self.model,
-                    "messages": [{"role": "user", "content": "안녕"}],
-                    "stream": False,
-                    "keep_alive": -1,
-                    "options": {"num_predict": 1},
-                },
-                timeout=120,
-            )
-        except Exception as e:  # noqa: BLE001
-            print(f"[engine] warmup failed: {e}")
-
-    def stream(self, system: str, user: str, options: dict):
-        payload = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "stream": True,
-            "keep_alive": -1,
-            "options": {
-                "temperature": options.get("temperature", 0.2),
-                "num_predict": options.get("num_predict", 256),
-            },
-        }
-        with requests.post(
-            f"{self.host}/api/chat", json=payload, stream=True, timeout=300
-        ) as resp:
-            resp.raise_for_status()
-            for line in resp.iter_lines(decode_unicode=True):
-                if not line:
-                    continue
-                try:
-                    obj = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                chunk = obj.get("message", {}).get("content", "")
-                if chunk:
-                    yield chunk
-                if obj.get("done"):
-                    break
 
 
 class LlamaCppEngine:
@@ -155,9 +84,9 @@ class LlamaCppEngine:
 
 
 def create_engine(cfg: dict):
-    backend = cfg.get("backend", "ollama").lower()
-    if backend == "ollama":
-        return OllamaEngine(cfg)
+    backend = cfg.get("backend", "llamacpp").lower()
     if backend == "llamacpp":
         return LlamaCppEngine(cfg)
-    raise ValueError(f"지원하지 않는 backend: {backend}")
+    raise ValueError(
+        f"지원하지 않는 backend: {backend} (현재는 'llamacpp' 만 지원)"
+    )

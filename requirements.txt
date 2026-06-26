@@ -1,5 +1,4 @@
-# ClipAI dependencies (prototype: Ollama backend)
-requests>=2.31
+# ClipAI dependencies
 keyboard>=0.13.5
 pyperclip>=1.8.2
 customtkinter>=5.2.0

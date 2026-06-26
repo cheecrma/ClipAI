@@ -1,8 +1,6 @@
 [model]
-# backend: "llamacpp" (독립 실행, 기본) | "ollama" (개발용) | "remote" (확장)
-backend   = "llamacpp"
+backend   = "llamacpp"   # 인프로세스 실행(독립). 현재 이 백엔드만 지원.
 
-# --- llamacpp 백엔드 (독립 실행 .exe) ---
 # path 의 .gguf 가 없으면 models/ 폴더의 .gguf 를 자동으로 찾는다.
 # 다른 모델을 쓰려면 models/ 에 .gguf 를 넣고 path 를 바꾸거나 비워두면 된다.
 path         = "models/gemma-2-2b-it-Q4_K_M.gguf"   # 상업 사용 가능(Gemma 약관). 없으면 models/*.gguf 자동
@@ -10,10 +8,6 @@ n_ctx        = 4096          # 입력 ~3,700토큰까지 (모델 최대 32768). 
 n_gpu_layers = 0            # CPU 빌드는 0 (CUDA 빌드일 때만 -1)
 n_threads    = 0            # 0=자동(전체 코어). 낮추면 CPU점유↓/응답 약간↓
 n_batch      = 1024         # 입력 ingest 배치 크기(기본 512). 클수록 긴 글 읽기 빠름
-
-# --- ollama 백엔드 (개발/프로토타입용) ---
-ollama_model = "exaone3.5:2.4b"
-ollama_host  = "http://localhost:11434"
 
 [ui]
 theme              = "dark"
